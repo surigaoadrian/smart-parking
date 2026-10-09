@@ -1,0 +1,186 @@
+package com.parking.management.Service;
+
+import com.parking.management.Entity.ParkingLot;
+import com.parking.management.Entity.Payment;
+import com.parking.management.Entity.Ticket;
+import com.parking.management.Enums.PaymentMethod;
+import com.parking.management.Enums.PaymentStatus;
+import com.parking.management.Enums.TicketStatus;
+import com.parking.management.Repository.PaymentRepository;
+import com.parking.management.Repository.TicketRepository;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
+@Service
+public class PaymentService {
+    private final PaymentRepository paymentRepository;
+    private final TicketRepository ticketRepository;
+    private final ParkingSlotService parkingSlotService;
+
+    public PaymentService(
+            PaymentRepository paymentRepository,
+            TicketRepository ticketRepository,
+            ParkingSlotService parkingSlotService) {
+
+        this.paymentRepository = paymentRepository;
+        this.ticketRepository = ticketRepository;
+        this.parkingSlotService = parkingSlotService;
+    }
+
+    public List<Payment> getAllPayments() {
+        return paymentRepository.findAll(
+                Sort.by(Sort.Direction.DESC, "paymentTime")
+        );
+    }
+
+    @Transactional
+    public Payment processPayment(
+            String ticketNumber,
+            PaymentMethod paymentMethod) {
+
+        // 1. Find ticket
+        Ticket ticket = ticketRepository
+                .findByTicketNumber(ticketNumber)
+                .orElseThrow(() ->
+                        new RuntimeException("Ticket not found")
+                );
+
+        // 2. Prevent paying completed tickets
+        if (ticket.getStatus() == TicketStatus.COMPLETED) {
+            throw new RuntimeException(
+                    "Ticket is already completed"
+            );
+        }
+
+        // 3. Prevent paying voided tickets
+        if (ticket.getStatus() == TicketStatus.VOIDED) {
+            throw new RuntimeException(
+                    "Cannot pay a voided ticket"
+            );
+        }
+
+        // 4. Prevent duplicate payments
+        if (paymentRepository
+                .findByTicket(ticket)
+                .isPresent()) {
+
+            throw new RuntimeException(
+                    "Payment already exists for this ticket"
+            );
+        }
+
+        // 5. Get the parking lot
+        ParkingLot parkingLot = ticket
+                .getParkingSlot()
+                .getParkingLot();
+
+        if (parkingLot == null) {
+            throw new RuntimeException(
+                    "Parking lot configuration not found"
+            );
+        }
+
+        // 6. Use one timestamp for fee calculation,
+        // payment time, and exit time
+        LocalDateTime paymentTime = LocalDateTime.now();
+
+        // 7. Calculate fee using the configured rates
+        BigDecimal amount = calculateFee(
+                ticket,
+                paymentTime,
+                parkingLot
+        );
+
+        // 8. Create payment
+        Payment payment = new Payment();
+
+        payment.setReceiptNumber(
+                generateReceiptNumber()
+        );
+
+        payment.setTicket(ticket);
+        payment.setAmount(amount);
+        payment.setPaymentMethod(paymentMethod);
+        payment.setStatus(PaymentStatus.PAID);
+        payment.setPaymentTime(paymentTime);
+
+        Payment savedPayment =
+                paymentRepository.save(payment);
+
+        // 9. Complete the ticket
+        ticket.setExitTime(paymentTime);
+        ticket.setStatus(TicketStatus.COMPLETED);
+
+        ticketRepository.save(ticket);
+
+        // 10. Release the parking slot
+        parkingSlotService.releaseSlot(
+                ticket.getParkingSlot()
+        );
+
+        return savedPayment;
+    }
+
+    private BigDecimal calculateFee(
+            Ticket ticket,
+            LocalDateTime endTime,
+            ParkingLot parkingLot) {
+
+        BigDecimal firstHourRate =
+                parkingLot.getFirstHourRate();
+
+        BigDecimal succeedingHourRate =
+                parkingLot.getSucceedingHourRate();
+
+        if (firstHourRate == null ||
+                succeedingHourRate == null) {
+
+            throw new RuntimeException(
+                    "Parking rates are not configured"
+            );
+        }
+
+        long minutes = Duration.between(
+                ticket.getEntryTime(),
+                endTime
+        ).toMinutes();
+
+        // Any partial hour counts as a full hour.
+        long hours =
+                (long) Math.ceil(minutes / 60.0);
+
+        // Minimum charge is always the first hour.
+        if (hours <= 1) {
+            return firstHourRate;
+        }
+
+        long succeedingHours = hours - 1;
+
+        BigDecimal succeedingCharge =
+                succeedingHourRate.multiply(
+                        BigDecimal.valueOf(
+                                succeedingHours
+                        )
+                );
+
+        return firstHourRate.add(
+                succeedingCharge
+        );
+    }
+
+    private String generateReceiptNumber() {
+
+        return "RCT-" +
+                UUID.randomUUID()
+                        .toString()
+                        .substring(0, 8)
+                        .toUpperCase();
+    }
+}
