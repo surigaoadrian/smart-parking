@@ -1,5 +1,7 @@
 package com.parking.management.Service;
 
+import com.parking.management.Exceptions.ConflictException;
+import com.parking.management.Exceptions.NotFoundException;
 import com.parking.management.Entity.ParkingLot;
 import com.parking.management.Entity.Payment;
 import com.parking.management.Entity.Ticket;
@@ -49,20 +51,20 @@ public class PaymentService {
         Ticket ticket = ticketRepository
                 .findByTicketNumber(ticketNumber)
                 .orElseThrow(() ->
-                        new RuntimeException("Ticket not found")
+                        new NotFoundException("Ticket " + ticketNumber + " not found")
                 );
 
         // 2. Prevent paying completed tickets
         if (ticket.getStatus() == TicketStatus.COMPLETED) {
-            throw new RuntimeException(
-                    "Ticket is already completed"
+            throw new ConflictException(
+                    "Ticket " + ticketNumber + " is already paid"
             );
         }
 
         // 3. Prevent paying voided tickets
         if (ticket.getStatus() == TicketStatus.VOIDED) {
-            throw new RuntimeException(
-                    "Cannot pay a voided ticket"
+            throw new ConflictException(
+                    "Ticket " + ticketNumber + " was voided and cannot be paid"
             );
         }
 
@@ -71,8 +73,8 @@ public class PaymentService {
                 .findByTicket(ticket)
                 .isPresent()) {
 
-            throw new RuntimeException(
-                    "Payment already exists for this ticket"
+            throw new ConflictException(
+                    "Payment already exists for ticket " + ticketNumber
             );
         }
 
@@ -82,8 +84,8 @@ public class PaymentService {
                 .getParkingLot();
 
         if (parkingLot == null) {
-            throw new RuntimeException(
-                    "Parking lot configuration not found"
+            throw new ConflictException(
+                    "This slot is not linked to a parking lot. Check the lot configuration"
             );
         }
 
@@ -142,8 +144,8 @@ public class PaymentService {
         if (firstHourRate == null ||
                 succeedingHourRate == null) {
 
-            throw new RuntimeException(
-                    "Parking rates are not configured"
+            throw new ConflictException(
+                    "Parking rates are not configured. Set them in Settings"
             );
         }
 

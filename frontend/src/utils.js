@@ -55,6 +55,18 @@ export function formatTime(date) {
   return date ? `${pad(date.getHours())}:${pad(date.getMinutes())}` : '—'
 }
 
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+// "Nov 13, 2026" — shown on tickets and receipts so multi-day stays are clear.
+export function formatDate(date) {
+  return date ? `${MONTHS[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}` : '—'
+}
+
+// "Nov 13, 2026 16:22"
+export function formatDateTime(date) {
+  return date ? `${formatDate(date)} ${formatTime(date)}` : '—'
+}
+
 export function formatClock(date) {
   return `${formatTime(date)}:${pad(date.getSeconds())}`
 }

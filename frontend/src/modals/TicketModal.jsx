@@ -1,6 +1,6 @@
 import Modal from '../components/Modal'
 import Barcode from '../components/Barcode'
-import { VEHICLE_LABEL, formatTime, pesoShort } from '../utils'
+import { VEHICLE_LABEL, formatDateTime, pesoShort } from '../utils'
 
 export default function TicketModal({ session, lot, onClose, onVoid }) {
   const canVoid = session.ticket?.status === 'ACTIVE'
@@ -26,7 +26,7 @@ export default function TicketModal({ session, lot, onClose, onVoid }) {
           </div>
           <div>
             <span>Entry time</span>
-            <span className="mono">{formatTime(session.entry)}</span>
+            <span className="mono">{formatDateTime(session.entry)}</span>
           </div>
           <div>
             <span>Rate</span>

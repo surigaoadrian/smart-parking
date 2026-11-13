@@ -1,5 +1,5 @@
 import Modal from '../components/Modal'
-import { METHOD_LABEL, formatDuration, formatTime, minutesBetween, parseDateTime, peso } from '../utils'
+import { METHOD_LABEL, formatDateTime, formatDuration, minutesBetween, parseDateTime, peso } from '../utils'
 
 export default function ReceiptModal({ payment, session, onClose }) {
   const paidAt = parseDateTime(payment.paymentTime)
@@ -27,12 +27,16 @@ export default function ReceiptModal({ payment, session, onClose }) {
             <span className="mono">{payment.ticket?.parkingSlot?.slotNumber ?? session?.slotNumber}</span>
           </div>
           <div>
+            <span>Entry</span>
+            <span className="mono">{formatDateTime(entry)}</span>
+          </div>
+          <div>
             <span>Duration</span>
             <span className="mono">{formatDuration(duration)}</span>
           </div>
           <div>
             <span>Paid at</span>
-            <span className="mono">{formatTime(paidAt)}</span>
+            <span className="mono">{formatDateTime(paidAt)}</span>
           </div>
         </div>
         <div className="modal-actions no-print">

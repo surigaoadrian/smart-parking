@@ -29,7 +29,7 @@ export default function ActiveSessionsMini({ sessions, selectedTicket, onPick, o
                 className={`clickable ${selectedTicket === s.ticketNumber ? 'selected' : ''}`}
                 onClick={() => onPick(s)}
               >
-                <td className={`mono strong ${s.overstay ? 'amber' : 'green'}`}>{s.slotNumber}</td>
+                <td className={`mono strong ${s.overstay ? 'warn' : 'brand'}`}>{s.slotNumber}</td>
                 <td>{s.plate}</td>
                 <td className="mono muted">{s.ticketNumber}</td>
                 <td className="mono">{formatDuration(s.minutes)}</td>

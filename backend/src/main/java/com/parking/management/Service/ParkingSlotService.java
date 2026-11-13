@@ -1,5 +1,8 @@
 package com.parking.management.Service;
 
+import com.parking.management.Exceptions.BadRequestException;
+import com.parking.management.Exceptions.ConflictException;
+import com.parking.management.Exceptions.NotFoundException;
 import com.parking.management.DTO.SlotLayoutRequest;
 import com.parking.management.Entity.ParkingLot;
 import com.parking.management.Entity.ParkingSlot;
@@ -7,10 +10,8 @@ import com.parking.management.Enums.SlotStatus;
 import com.parking.management.Enums.SlotType;
 import com.parking.management.Repository.ParkingLotRepository;
 import com.parking.management.Repository.ParkingSlotRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,7 +47,7 @@ public class ParkingSlotService {
                         slotType
                 )
                 .orElseThrow(() ->
-                        new RuntimeException("No available parking slot")
+                        new ConflictException("No available " + slotType + " slot. The lot is full for this type")
                 );
     }
 
@@ -58,18 +59,19 @@ public class ParkingSlotService {
                 .findBySlotNumber(slotNumber)
                 .filter(ParkingSlot::isActive)
                 .orElseThrow(() ->
-                        new RuntimeException("Parking slot not found")
+                        new NotFoundException("Parking slot " + slotNumber + " not found")
                 );
 
         if (slot.getStatus() != SlotStatus.AVAILABLE) {
-            throw new RuntimeException(
-                    "Parking slot is not available"
+            throw new ConflictException(
+                    "Parking slot " + slotNumber + " is not available"
             );
         }
 
         if (slotType != null && slot.getSlotType() != slotType) {
-            throw new RuntimeException(
-                    "Parking slot type does not match the vehicle"
+            throw new BadRequestException(
+                    "Parking slot " + slotNumber + " is a " + slot.getSlotType()
+                            + " slot, not " + slotType
             );
         }
 
@@ -102,7 +104,7 @@ public class ParkingSlotService {
         ParkingLot parkingLot = parkingLotRepository
                 .findById(parkingLotId)
                 .orElseThrow(() ->
-                        badRequest("Parking lot not found")
+                        new NotFoundException("Parking lot " + parkingLotId + " not found")
                 );
 
         if (layout == null || layout.isEmpty()) {
@@ -191,11 +193,11 @@ public class ParkingSlotService {
         return getAllSlots();
     }
 
-    private ResponseStatusException badRequest(String message) {
-        return new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
+    private BadRequestException badRequest(String message) {
+        return new BadRequestException(message);
     }
 
-    private ResponseStatusException conflict(String message) {
-        return new ResponseStatusException(HttpStatus.CONFLICT, message);
+    private ConflictException conflict(String message) {
+        return new ConflictException(message);
     }
 }

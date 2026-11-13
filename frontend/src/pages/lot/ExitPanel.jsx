@@ -3,7 +3,7 @@ import {
   PAYMENT_METHODS,
   VEHICLE_LABEL,
   formatDuration,
-  formatTime,
+  formatDateTime,
   peso,
   pesoShort,
 } from '../../utils'
@@ -43,11 +43,11 @@ export default function ExitPanel({ session, now, onBack, onPay, onVoid, onShowT
         <div className="kv">
           <div>
             <span>Entry</span>
-            <span className="mono">{formatTime(session.entry)}</span>
+            <span className="mono">{formatDateTime(session.entry)}</span>
           </div>
           <div>
             <span>Exit</span>
-            <span className="mono">{formatTime(now)}</span>
+            <span className="mono">{formatDateTime(now)}</span>
           </div>
           <div>
             <span>Duration</span>

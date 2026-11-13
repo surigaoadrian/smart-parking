@@ -1,3 +1,4 @@
+import logo from '../assets/logo-128.png'
 import { IconCar, IconCard, IconLot, IconSearch, IconSliders } from './Icons'
 
 const NAV = [
@@ -10,7 +11,7 @@ const NAV = [
 export default function Sidebar({ page, onNavigate, onFind }) {
   return (
     <aside className="sidebar">
-      <div className="logo">P</div>
+      <img className="logo" src={logo} alt="Smart Parking" />
       <nav className="nav">
         {NAV.map(({ key, label, Icon }) => (
           <button

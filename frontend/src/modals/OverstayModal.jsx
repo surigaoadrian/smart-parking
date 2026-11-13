@@ -16,7 +16,7 @@ export default function OverstayModal({ sessions, limitHours, onResolve, onClose
       <div className="modal-list">
         {sessions.map((s) => (
           <div key={s.ticketNumber} className="list-row static">
-            <span className="slot-chip amber">{s.slotNumber}</span>
+            <span className="slot-chip warn">{s.slotNumber}</span>
             <span className="grow">
               <span className="block">{s.plate}</span>
               <span className="mono muted tiny">

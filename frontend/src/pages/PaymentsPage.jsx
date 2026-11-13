@@ -63,7 +63,7 @@ export default function PaymentsPage({ payments, voids, source }) {
           <tbody>
             {todays.map((p) => (
               <tr key={p.receiptNumber}>
-                <td className="mono green">{p.receiptNumber}</td>
+                <td className="mono brand">{p.receiptNumber}</td>
                 <td>{p.ticket?.vehicle?.plateNumber ?? '—'}</td>
                 <td className="mono">{p.ticket?.parkingSlot?.slotNumber ?? '—'}</td>
                 <td>

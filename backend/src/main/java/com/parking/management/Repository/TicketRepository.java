@@ -11,4 +11,6 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     Optional<Ticket> findByTicketNumber(String ticketNumber);
 
     List<Ticket> findByStatus(TicketStatus status);
+
+    boolean existsByVehicle_PlateNumberAndStatus(String plateNumber, TicketStatus status);
 }

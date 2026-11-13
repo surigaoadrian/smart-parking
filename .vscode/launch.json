@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Backend (Spring Boot)",
+      "request": "launch",
+      "mainClass": "com.parking.management.ParkingManagementApplication",
+      "projectName": "parking-management",
+      "cwd": "${workspaceFolder}/backend",
+      "envFile": "${workspaceFolder}/backend/.env"
+    }
+  ]
+}

@@ -25,7 +25,8 @@ export function useParkingData() {
   const [online, setOnline] = useState(null)
   const [serverPayments, setServerPayments] = useState(null)
   // Payments come from GET /api/payments; the localStorage copy is only a fallback
-  // for when that request fails. Voids have no backend endpoint yet.
+  // for when that request fails. Voids are saved on the server (POST /tickets/{n}/void);
+  // this local list only feeds the "voided today" summary on the Payments page.
   const [localPayments, setLocalPayments] = useStoredList('smart-parking.payments')
   const [voids, setVoids] = useStoredList('smart-parking.voids')
 

@@ -3,6 +3,7 @@ package com.parking.management.Controller;
 import com.parking.management.DTO.EntryRequest;
 import com.parking.management.Entity.Ticket;
 import com.parking.management.Service.ParkingService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +20,7 @@ public class ParkingController {
 
     @PostMapping("/entry")
     public Ticket enterVehicle(
-            @RequestBody EntryRequest request) {
+            @Valid @RequestBody EntryRequest request) {
 
         return parkingService.enterVehicle(
                 request.getPlateNumber(),

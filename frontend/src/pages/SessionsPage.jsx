@@ -51,12 +51,12 @@ export default function SessionsPage({ sessions, onVoid, onShowTicket, onCheckOu
           <tbody>
             {visible.map((s) => (
               <tr key={s.ticketNumber}>
-                <td className={`mono strong ${s.overstay ? 'amber' : 'green'}`}>{s.slotNumber}</td>
+                <td className={`mono strong ${s.overstay ? 'warn' : 'brand'}`}>{s.slotNumber}</td>
                 <td>
                   <span className="plate-cell">
                     {s.plate}
                     {s.overstay ? (
-                      <span className="tag amber">overstay</span>
+                      <span className="tag warn">overstay</span>
                     ) : (
                       <span className="tag">{VEHICLE_LABEL[s.vehicleType] ?? '—'}</span>
                     )}

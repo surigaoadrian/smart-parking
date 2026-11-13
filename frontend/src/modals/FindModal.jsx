@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import Modal from '../components/Modal'
-import { formatDuration, formatTime, matchesQuery } from '../utils'
+import { formatDateTime, formatDuration, matchesQuery } from '../utils'
 
 export default function FindModal({ sessions, onPick, onClose }) {
   const [query, setQuery] = useState('')
@@ -22,11 +22,11 @@ export default function FindModal({ sessions, onPick, onClose }) {
       <div className="modal-list">
         {results.map((s) => (
           <button key={s.ticketNumber} type="button" className="list-row" onClick={() => onPick(s)}>
-            <span className={`slot-chip ${s.overstay ? 'amber' : ''}`}>{s.slotNumber}</span>
+            <span className={`slot-chip ${s.overstay ? 'warn' : ''}`}>{s.slotNumber}</span>
             <span className="grow">
               <span className="block">{s.plate}</span>
               <span className="mono muted tiny">
-                {s.ticketNumber} · in {formatTime(s.entry)}
+                {s.ticketNumber} · in {formatDateTime(s.entry)}
               </span>
             </span>
             <span className="mono small">{formatDuration(s.minutes)}</span>

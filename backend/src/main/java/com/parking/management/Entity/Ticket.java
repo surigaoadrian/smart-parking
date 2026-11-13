@@ -28,6 +28,9 @@ public class Ticket {
 
     private LocalDateTime exitTime;
 
+    // Why the ticket was voided (only set when status is VOIDED).
+    private String voidReason;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TicketStatus status;
@@ -86,5 +89,13 @@ public class Ticket {
 
     public void setStatus(TicketStatus status) {
         this.status = status;
+    }
+
+    public String getVoidReason() {
+        return voidReason;
+    }
+
+    public void setVoidReason(String voidReason) {
+        this.voidReason = voidReason;
     }
 }

@@ -60,21 +60,10 @@ export const api = {
 
   getPayments: () => request('/payments'),
 
-  // Not implemented by the backend yet.
-  async voidTicket(ticketNumber, reason) {
-    try {
-      return await request(`/tickets/${encodeURIComponent(ticketNumber)}/void`, {
-        method: 'POST',
-        body: { reason },
-      })
-    } catch (err) {
-      if (err instanceof ApiError && err.missingEndpoint) {
-        throw new ApiError(
-          'The backend has no void endpoint yet (POST /api/tickets/{ticketNumber}/void).',
-          err.status,
-        )
-      }
-      throw err
-    }
-  },
+  // Marks the ticket VOIDED on the server and releases its slot.
+  voidTicket: (ticketNumber, reason) =>
+    request(`/tickets/${encodeURIComponent(ticketNumber)}/void`, {
+      method: 'POST',
+      body: { reason },
+    }),
 }
