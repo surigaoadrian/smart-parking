@@ -1,19 +1,24 @@
 import logo from '../assets/logo-128.png'
-import { IconCar, IconCard, IconLot, IconSearch, IconSliders } from './Icons'
+import { IconCar, IconCard, IconChart, IconLot, IconSearch, IconSliders, IconUsers } from './Icons'
 
-const NAV = [
+// adminOnly pages are hidden from attendants (the backend also refuses their requests).
+export const NAV = [
   { key: 'lot', label: 'Lot', Icon: IconLot },
   { key: 'sessions', label: 'Sessions', Icon: IconCar },
   { key: 'payments', label: 'Payments', Icon: IconCard },
-  { key: 'settings', label: 'Settings', Icon: IconSliders },
+  { key: 'reports', label: 'Reports', Icon: IconChart, adminOnly: true },
+  { key: 'settings', label: 'Settings', Icon: IconSliders, adminOnly: true },
+  { key: 'staff', label: 'Staff', Icon: IconUsers, adminOnly: true },
 ]
 
-export default function Sidebar({ page, onNavigate, onFind }) {
+export default function Sidebar({ page, isAdmin, onNavigate, onFind }) {
+  const items = NAV.filter((item) => isAdmin || !item.adminOnly)
+
   return (
     <aside className="sidebar">
       <img className="logo" src={logo} alt="Smart Parking" />
       <nav className="nav">
-        {NAV.map(({ key, label, Icon }) => (
+        {items.map(({ key, label, Icon }) => (
           <button
             key={key}
             type="button"

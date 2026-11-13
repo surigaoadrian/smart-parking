@@ -2,6 +2,7 @@ package com.parking.management.Controller;
 
 import com.parking.management.DTO.VoidRequest;
 import com.parking.management.Entity.Ticket;
+import com.parking.management.Service.StaffService;
 import com.parking.management.Service.TicketService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,10 +18,13 @@ import java.util.List;
 @RequestMapping("/api/tickets")
 public class TicketController {
     private final TicketService ticketService;
+    private final StaffService staffService;
 
     public TicketController(
-            TicketService ticketService) {
+            TicketService ticketService,
+            StaffService staffService) {
         this.ticketService = ticketService;
+        this.staffService = staffService;
     }
 
     @GetMapping("/active")
@@ -42,7 +46,8 @@ public class TicketController {
 
         return ticketService.voidTicket(
                 ticketNumber,
-                request.getReason()
+                request.getReason(),
+                staffService.getCurrentStaff()
         );
     }
 }

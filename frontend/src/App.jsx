@@ -12,22 +12,33 @@ import Toasts from './components/Toasts'
 import LotPage from './pages/lot/LotPage'
 import SessionsPage from './pages/SessionsPage'
 import PaymentsPage from './pages/PaymentsPage'
+import ReportsPage from './pages/ReportsPage'
 import SettingsPage from './pages/SettingsPage'
+import StaffPage from './pages/StaffPage'
 import TicketModal from './modals/TicketModal'
 import VoidModal from './modals/VoidModal'
 import ReceiptModal from './modals/ReceiptModal'
 import FindModal from './modals/FindModal'
 import OverstayModal from './modals/OverstayModal'
+import ResetPasswordModal from './modals/ResetPasswordModal'
+import { NAV } from './components/Sidebar'
 
 const SUBTITLES = {
   lot: 'Attendant console',
   sessions: 'Active sessions',
   payments: 'Payments & receipts',
+  reports: 'Revenue & activity',
   settings: 'Lot configuration',
+  staff: 'Staff accounts',
 }
 
-export default function App() {
-  const [page, navigate] = useHashRoute()
+const ADMIN_ONLY_PAGES = NAV.filter((item) => item.adminOnly).map((item) => item.key)
+
+export default function App({ user, onLogout }) {
+  const isAdmin = user.role === 'ADMIN'
+  const [routePage, navigate] = useHashRoute()
+  // Attendants who open an admin page (old link, typed URL) land on the lot instead.
+  const page = !isAdmin && ADMIN_ONLY_PAGES.includes(routePage) ? 'lot' : routePage
   const now = useNow(1000)
   const data = useParkingData()
   const { toasts, notify } = useToasts()
@@ -94,6 +105,12 @@ export default function App() {
     data.refresh()
   }
 
+  async function changeOwnPassword({ currentPassword, newPassword }) {
+    await api.changePassword(currentPassword, newPassword)
+    setModal(null)
+    notify('Password changed')
+  }
+
   async function saveConfiguration({ lot, layout }) {
     if (layout) await api.updateLayout(data.lot.id, layout)
     if (lot) data.setLot(await api.updateLot(lot.id, lot))
@@ -106,7 +123,12 @@ export default function App() {
 
   return (
     <div className="app">
-      <Sidebar page={page} onNavigate={navigate} onFind={() => setModal({ type: 'find' })} />
+      <Sidebar
+        page={page}
+        isAdmin={isAdmin}
+        onNavigate={navigate}
+        onFind={() => setModal({ type: 'find' })}
+      />
 
       <main className="main">
         <Topbar
@@ -115,8 +137,12 @@ export default function App() {
           online={data.online}
           now={now}
           onOverstay={() => setModal({ type: 'overstay' })}
+          user={user}
+          onChangePassword={() => setModal({ type: 'password' })}
+          onLogout={onLogout}
         />
-        <StatsBar {...stats} />
+        {/* Reports has its own figures for the chosen period; live lot stats would compete with them. */}
+        {page !== 'reports' && <StatsBar {...stats} />}
 
         {data.online === false && (
           <div className="banner">
@@ -153,7 +179,11 @@ export default function App() {
           {page === 'payments' && (
             <PaymentsPage payments={data.payments} voids={data.voids} source={data.paymentsSource} />
           )}
-          {page === 'settings' && <SettingsPage lot={data.lot} slots={data.slots} onSave={saveConfiguration} />}
+          {page === 'reports' && isAdmin && <ReportsPage />}
+          {page === 'settings' && isAdmin && (
+            <SettingsPage lot={data.lot} slots={data.slots} onSave={saveConfiguration} />
+          )}
+          {page === 'staff' && isAdmin && <StaffPage currentUser={user} notify={notify} />}
         </div>
       </main>
 
@@ -166,7 +196,13 @@ export default function App() {
         />
       )}
       {modal?.type === 'void' && (
-        <VoidModal session={modal.session} onClose={closeModal} onConfirm={voidTicket} />
+        <VoidModal
+          session={modal.session}
+          isAdmin={isAdmin}
+          voidWindowMinutes={data.lot?.voidWindowMinutes ?? 15}
+          onClose={closeModal}
+          onConfirm={voidTicket}
+        />
       )}
       {modal?.type === 'receipt' && (
         <ReceiptModal payment={modal.payment} session={modal.session} onClose={closeModal} />
@@ -178,6 +214,15 @@ export default function App() {
           limitHours={data.lot?.overstayAfterHours}
           onResolve={checkOut}
           onClose={closeModal}
+        />
+      )}
+
+      {modal?.type === 'password' && (
+        <ResetPasswordModal
+          title="Change your password"
+          askCurrent
+          onClose={closeModal}
+          onSubmit={changeOwnPassword}
         />
       )}
 

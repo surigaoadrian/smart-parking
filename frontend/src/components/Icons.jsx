@@ -68,3 +68,19 @@ export const IconSearch = () => (
     <path d="m20 20-4.2-4.2" />
   </svg>
 )
+
+export const IconChart = () => (
+  <svg {...base}>
+    <path d="M4 20h16" />
+    <path d="M7 16v-5M12 16V6M17 16v-8" />
+  </svg>
+)
+
+export const IconUsers = () => (
+  <svg {...base}>
+    <circle cx="9" cy="8" r="3.2" />
+    <path d="M3.5 19a5.5 5.5 0 0 1 11 0" />
+    <path d="M16 5.2a3 3 0 0 1 0 5.6" />
+    <path d="M17.5 14.2A5.5 5.5 0 0 1 20.5 19" />
+  </svg>
+)

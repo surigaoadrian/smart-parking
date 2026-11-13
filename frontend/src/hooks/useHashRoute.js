@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 
-export const PAGES = ['lot', 'sessions', 'payments', 'settings']
+export const PAGES = ['lot', 'sessions', 'payments', 'reports', 'settings', 'staff']
 
 function readHash() {
   const page = window.location.hash.replace(/^#\/?/, '')

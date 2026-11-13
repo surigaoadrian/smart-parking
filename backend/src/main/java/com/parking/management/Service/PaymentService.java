@@ -4,6 +4,7 @@ import com.parking.management.Exceptions.ConflictException;
 import com.parking.management.Exceptions.NotFoundException;
 import com.parking.management.Entity.ParkingLot;
 import com.parking.management.Entity.Payment;
+import com.parking.management.Entity.Staff;
 import com.parking.management.Entity.Ticket;
 import com.parking.management.Enums.PaymentMethod;
 import com.parking.management.Enums.PaymentStatus;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -36,16 +38,28 @@ public class PaymentService {
         this.parkingSlotService = parkingSlotService;
     }
 
-    public List<Payment> getAllPayments() {
-        return paymentRepository.findAll(
+    /** Admins see every payment; attendants only see today's (their shift). */
+    public List<Payment> getPayments(Staff viewer) {
+        List<Payment> payments = paymentRepository.findAll(
                 Sort.by(Sort.Direction.DESC, "paymentTime")
         );
+
+        if (viewer.isAdmin()) {
+            return payments;
+        }
+
+        LocalDate today = LocalDate.now();
+        return payments.stream()
+                .filter(p -> p.getPaymentTime() != null
+                        && p.getPaymentTime().toLocalDate().equals(today))
+                .toList();
     }
 
     @Transactional
     public Payment processPayment(
             String ticketNumber,
-            PaymentMethod paymentMethod) {
+            PaymentMethod paymentMethod,
+            Staff processedBy) {
 
         // 1. Find ticket
         Ticket ticket = ticketRepository
@@ -112,6 +126,7 @@ public class PaymentService {
         payment.setPaymentMethod(paymentMethod);
         payment.setStatus(PaymentStatus.PAID);
         payment.setPaymentTime(paymentTime);
+        payment.setProcessedBy(processedBy);
 
         Payment savedPayment =
                 paymentRepository.save(payment);
@@ -130,7 +145,8 @@ public class PaymentService {
         return savedPayment;
     }
 
-    private BigDecimal calculateFee(
+    /** The fee for a stay from entry until endTime (also used by reports for voided tickets). */
+    public BigDecimal calculateFee(
             Ticket ticket,
             LocalDateTime endTime,
             ParkingLot parkingLot) {

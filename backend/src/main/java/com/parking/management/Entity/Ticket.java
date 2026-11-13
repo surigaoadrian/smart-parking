@@ -31,6 +31,16 @@ public class Ticket {
     // Why the ticket was voided (only set when status is VOIDED).
     private String voidReason;
 
+    // Staff member who issued the ticket at the gate (null for tickets made before login existed).
+    @ManyToOne
+    @JoinColumn(name = "issued_by_id")
+    private Staff issuedBy;
+
+    // Staff member who voided the ticket (only set when status is VOIDED).
+    @ManyToOne
+    @JoinColumn(name = "voided_by_id")
+    private Staff voidedBy;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TicketStatus status;
@@ -97,5 +107,21 @@ public class Ticket {
 
     public void setVoidReason(String voidReason) {
         this.voidReason = voidReason;
+    }
+
+    public Staff getIssuedBy() {
+        return issuedBy;
+    }
+
+    public void setIssuedBy(Staff issuedBy) {
+        this.issuedBy = issuedBy;
+    }
+
+    public Staff getVoidedBy() {
+        return voidedBy;
+    }
+
+    public void setVoidedBy(Staff voidedBy) {
+        this.voidedBy = voidedBy;
     }
 }

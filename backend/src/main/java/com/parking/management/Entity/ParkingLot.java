@@ -25,6 +25,12 @@ public class ParkingLot {
     @Column(nullable = false)
     private Integer overstayAfterHours;
 
+    // How long after issue an attendant may still void a ticket; admins can always void.
+    // Nullable so existing rows keep working; null means DEFAULT_VOID_WINDOW_MINUTES.
+    private Integer voidWindowMinutes;
+
+    public static final int DEFAULT_VOID_WINDOW_MINUTES = 15;
+
     public ParkingLot() {
     }
 
@@ -70,5 +76,13 @@ public class ParkingLot {
 
     public void setOverstayAfterHours(Integer overstayAfterHours) {
         this.overstayAfterHours = overstayAfterHours;
+    }
+
+    public Integer getVoidWindowMinutes() {
+        return voidWindowMinutes != null ? voidWindowMinutes : DEFAULT_VOID_WINDOW_MINUTES;
+    }
+
+    public void setVoidWindowMinutes(Integer voidWindowMinutes) {
+        this.voidWindowMinutes = voidWindowMinutes;
     }
 }

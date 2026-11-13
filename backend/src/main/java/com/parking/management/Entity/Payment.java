@@ -34,6 +34,11 @@ public class Payment {
 
     private LocalDateTime paymentTime;
 
+    // Staff member who took the payment (null for payments made before login existed).
+    @ManyToOne
+    @JoinColumn(name = "processed_by_id")
+    private Staff processedBy;
+
     public Payment() {
     }
 
@@ -87,5 +92,13 @@ public class Payment {
 
     public void setPaymentTime(LocalDateTime paymentTime) {
         this.paymentTime = paymentTime;
+    }
+
+    public Staff getProcessedBy() {
+        return processedBy;
+    }
+
+    public void setProcessedBy(Staff processedBy) {
+        this.processedBy = processedBy;
     }
 }

@@ -2,6 +2,7 @@ package com.parking.management.Service;
 
 import com.parking.management.Exceptions.ConflictException;
 import com.parking.management.Entity.ParkingSlot;
+import com.parking.management.Entity.Staff;
 import com.parking.management.Entity.Ticket;
 import com.parking.management.Entity.Vehicle;
 import com.parking.management.Enums.SlotType;
@@ -37,7 +38,8 @@ public class ParkingService {
             String plateNumber,
             VehicleType vehicleType,
             SlotType slotType,
-            String slotNumber) {
+            String slotNumber,
+            Staff issuedBy) {
 
         String plate = normalizePlate(plateNumber);
 
@@ -72,7 +74,8 @@ public class ParkingService {
 
         return ticketService.createTicket(
                 vehicle,
-                slot
+                slot,
+                issuedBy
         );
     }
 

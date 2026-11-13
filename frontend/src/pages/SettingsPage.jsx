@@ -40,6 +40,7 @@ function lotToForm(lot) {
     firstHourRate: String(lot?.firstHourRate ?? ''),
     succeedingHourRate: String(lot?.succeedingHourRate ?? ''),
     overstayAfterHours: String(lot?.overstayAfterHours ?? ''),
+    voidWindowMinutes: String(lot?.voidWindowMinutes ?? 15),
   }
 }
 
@@ -51,6 +52,9 @@ function validateRates(form) {
   if (form.succeedingHourRate === '' || Number.isNaN(next) || next < 0)
     return 'Succeeding hour rate must be 0 or more.'
   if (!Number.isInteger(hours) || hours < 1) return 'Overstay limit must be a whole number of hours (1 or more).'
+  const voidWindow = Number(form.voidWindowMinutes)
+  if (form.voidWindowMinutes === '' || !Number.isInteger(voidWindow) || voidWindow < 0 || voidWindow > 1440)
+    return 'Attendant void window must be 0 to 1440 minutes.'
   return ''
 }
 
@@ -153,6 +157,7 @@ export default function SettingsPage({ lot, slots, onSave }) {
               firstHourRate: Number(rates.firstHourRate),
               succeedingHourRate: Number(rates.succeedingHourRate),
               overstayAfterHours: Number(rates.overstayAfterHours),
+              voidWindowMinutes: Number(rates.voidWindowMinutes),
             }
           : null,
       })
@@ -306,6 +311,18 @@ export default function SettingsPage({ lot, slots, onSave }) {
                   />
                   <em>hours</em>
                 </span>
+              </label>
+              <label>
+                <span className="eyebrow">Attendants can void within</span>
+                <span className="input-affix">
+                  <input
+                    inputMode="numeric"
+                    value={rates.voidWindowMinutes}
+                    onChange={setRate('voidWindowMinutes')}
+                  />
+                  <em>min of issue</em>
+                </span>
+                <span className="hint left">Older tickets can only be voided by an admin.</span>
               </label>
             </div>
           ) : (
